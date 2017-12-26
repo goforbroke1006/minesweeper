@@ -13,11 +13,7 @@
 #include <GLUT/GLUT.h>
 #endif
 
-#if defined(linux)
-static const int SCREEN_TOP_MARGIN = 12;
-#else
-static const int SCREEN_TOP_MARGIN = 30;
-#endif
+const bool DEBUG = true;
 
 bool alive = true;
 
@@ -44,6 +40,12 @@ void mouseClicks(int button, int state, int x, int y);
 int coord2pos(int row, int col) {
     return row * GRID_COLS + col;
 }
+
+//std::tuple<int, int> pos2coord(int pos) {
+//    int row = pos / GRID_ROWS;
+//    int col = pos - row * GRID_ROWS;
+//    return std::make_tuple(row, col);
+//}
 
 int myRand(int from, int to) {
     return rand() % to + from;
@@ -75,12 +77,14 @@ void drawCell(int x, int y, CellState cellState) {
     int cellHeight = SCREEN_HEIGHT / GRID_ROWS;
 
     int left = x * cellWidth + GRID_CELL_SPACING / 2;
-    int top = y * cellHeight + GRID_CELL_SPACING / 2 + SCREEN_TOP_MARGIN;
+    int top = y * cellHeight + GRID_CELL_SPACING / 2;
     int right = left + cellWidth - GRID_CELL_SPACING;
     int bottom = top + cellHeight - GRID_CELL_SPACING;
 
-    if (cellState.closed) {
-        glColor3f(0.85, 0.85, 0.85);
+    if (DEBUG && cellState.closed && cellState.hasBomb) {
+        glColor3f(1.0, 0.75, 0.75);
+    } else if (cellState.closed) {
+        glColor3f(0.75, 0.75, 0.75);
     } else if (cellState.hasBomb) {
         glColor3f(1.0, 0.0, 0.0);
     } else {
@@ -96,8 +100,7 @@ void drawCell(int x, int y, CellState cellState) {
 
     if (!cellState.closed && cellState.hasBomb) {
         glColor3f(0.25, 0.25, 0.25);
-        drawCircle(left + cellWidth / 2, top + cellHeight / 2,
-                   std::min(cellWidth / 4, cellHeight / 4), 15);
+        drawCircle(left + cellWidth / 2, top + cellHeight / 2, std::min(cellWidth / 4, cellHeight / 4), 15);
     }
 }
 
@@ -119,14 +122,13 @@ int main(int argc, char **argv) {
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 
     glutInitWindowPosition(100, 100);
-    glutInitWindowSize(SCREEN_WIDTH, SCREEN_TOP_MARGIN + SCREEN_HEIGHT);
+    glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
     glutCreateWindow("Minesweeper");
 
     glClearColor(0.0, 0.0, 0.0, 0.0);         // black background
     glMatrixMode(GL_PROJECTION);              // setup viewing projection
     glLoadIdentity();                           // start with identity matrix
-    glOrtho(0.0, SCREEN_WIDTH, SCREEN_TOP_MARGIN + SCREEN_HEIGHT, 10.0, -1.0,
-            1.0);   // setup a 10x10x2 viewing world
+    glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1.0, 1.0);   // setup a 10x10x2 viewing world
 
     // Generate bombs
     for (int i = 0; i < 10;) {
@@ -176,14 +178,15 @@ void display() {
         glEnd();
 
         glColor3f(1.0, 0.25, 0.25);
-        glSprint(SCREEN_WIDTH / 2 - 75, SCREEN_HEIGHT / 2 + 10, "GAME OVER");
+        glSprint(SCREEN_WIDTH / 2 - 75, SCREEN_HEIGHT / 2 + 10, const_cast<char *>("GAME OVER"));
     }
 
     glFlush();
 }
 
 void resize(int width, int height) {
-    glutReshapeWindow(SCREEN_WIDTH, SCREEN_TOP_MARGIN + SCREEN_HEIGHT);
+//    glutReshapeWindow(SCREEN_WIDTH, SCREEN_TOP_MARGIN + SCREEN_HEIGHT);
+    glutReshapeWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
 void mouseClicks(int button, int state, int x, int y) {
@@ -193,7 +196,7 @@ void mouseClicks(int button, int state, int x, int y) {
         int cellWidth = SCREEN_WIDTH / GRID_COLS;
         int cellHeight = SCREEN_HEIGHT / GRID_ROWS;
 
-        int row = (y - SCREEN_TOP_MARGIN) / cellHeight;
+        int row = y / cellHeight;
         int col = x / cellWidth;
 
         int pos = coord2pos(row, col);

@@ -75,11 +75,11 @@ public:
     }
 };
 
-int coord2pos(int colsCount, int row, int col) {
+int coord2pos(const int colsCount, const int row, const int col) {
     return row * colsCount + col;
 }
 
-int myRand(int from, int to) {
+int myRand(const int from, const int to) {
     return rand() % to + from;
 }
 

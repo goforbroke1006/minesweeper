@@ -8,4 +8,4 @@ add_executable(minesweeper ${SOURCE_FILES})
 target_link_libraries(minesweeper glut GLU GL)
 
 
-add_executable(minesweeper_tests tests/catch.hpp tests/main_test.cpp)
+add_executable(minesweeper_tests tests/catch.hpp tests/std_test.cpp)

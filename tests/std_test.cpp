@@ -4,6 +4,7 @@
 
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 
+#include <iterator>
 #include "catch.hpp"
 
 #include "../std.h"
@@ -26,10 +27,14 @@ TEST_CASE("Getting rectangle by position works fine") {
     REQUIRE(get_rect(0, 4, 4, 100, 100, 2)->getX() == 1);
     REQUIRE(get_rect(0, 4, 4, 100, 100, 2)->getY() == 1);
 
-    REQUIRE(get_rect(5, 4, 4, 100, 100, 2)->getX() == 26);
-    REQUIRE(get_rect(5, 4, 4, 100, 100, 2)->getY() == 26);
+    REQUIRE(get_rect(5, 4, 4, 100, 100, 2)->getX() == 26); // rect in position 2x2
+    REQUIRE(get_rect(5, 4, 4, 100, 100, 2)->getY() == 26); // rect in position 2x2
 
-//    REQUIRE(get_rect(14, 4, 4, 100, 100, 2)->getX() == 76);
-//    REQUIRE(get_rect(14, 4, 4, 100, 100, 2)->getX() == 76);
-//    REQUIRE(get_rect(14, 4, 4, 100, 100, 2)->getX() == 76);
+    REQUIRE(get_rect(15, 4, 4, 100, 100, 2)->getX() == 76); // rect in position 4x4
+    REQUIRE(get_rect(15, 4, 4, 100, 100, 2)->getY() == 76); // rect in position 4x4
+}
+
+TEST_CASE("Nearest cells detect correctly") {
+    const std::vector<int> &v1 = getNearest(5, 4, 4); // cell 2x2
+    REQUIRE(v1 == std::vector<int>{1, 2, 6, 10, 9, 8, 4, 0});
 }

@@ -8,6 +8,7 @@
 #include <map>
 #include <cmath>
 #include <cstring>
+#include <sys/ptrace.h>
 
 #else
 #include <GLUT/GLUT.h>
@@ -16,9 +17,11 @@
 #include "std.h"
 #include "extra_glut.h"
 
-const bool DEBUG = false;
-#ifdef _DEBUG
-DEBUG = true;
+bool MDEBUG = false;
+//#ifdef _DEBUG
+//#ifdef NDEBUG
+#if defined(_DEBUG) || defined(NDEBUG)
+MDEBUG = true;
 #endif
 
 bool alive = true;
@@ -31,7 +34,7 @@ static const int GRID_ROWS = 30;
 static const int GRID_CELL_SPACING = 2;
 
 
-std::vector<CellState *> cellsMeta;
+std::vector<CellState *> cells;
 
 void display();
 
@@ -48,7 +51,7 @@ void drawCell(int position, CellState *cellState) {
 
     GLfloat red = 1.0, green = 1.0, blue = 1.0;
 
-    if (DEBUG && cellState->isClosed() && cellState->isHasBomb()) {
+    if (MDEBUG && cellState->isClosed() && cellState->isHasBomb()) {
         green = 0.75;
         blue = 0.75;
     } else if (cellState->isClosed()) {
@@ -85,11 +88,19 @@ void glSprint(int x, int y, char *st) {
     }
 }
 
+bool isDebug() {
+    return ptrace(PTRACE_TRACEME, 0, 1, 0) == -1;
+}
+
 int main(int argc, char **argv) {
+    if (isDebug()) {
+        MDEBUG = true;
+    }
+
     srand(time(NULL));
 
     for (int i = 0; i < GRID_ROWS * GRID_COLS; i++) {
-        cellsMeta.push_back(new CellState);
+        cells.push_back(new CellState);
     }
 
     glutInit(&argc, argv);
@@ -108,11 +119,11 @@ int main(int argc, char **argv) {
     for (int i = 0; i < 10;) {
         int cpos = myRand(0, GRID_ROWS * GRID_COLS);
         std::cout << "Create bomb in cell # " << cpos << std::endl;
-//        if (cellsMeta.at(cpos) == cellsMeta.end()) {
+//        if (cells.at(cpos) == cells.end()) {
 
-        auto *state = new CellState;
+        auto *state = cells.at(cpos);
         state->setHasBomb(true);
-        cellsMeta.push_back(state);
+        cells.push_back(state);
         i++;
 //        }
     }
@@ -130,7 +141,7 @@ void display() {
     glColor3f(0.85, 0.85, 0.85);
 
     for (unsigned long i = 0; i < GRID_ROWS * GRID_COLS; i++) {
-        CellState *state = cellsMeta.at(i);
+        CellState *state = cells.at(i);
         drawCell(i, state);
     }
 
@@ -164,7 +175,7 @@ void mouseClicks(int button, int state, int x, int y) {
         int col = x / cellWidth;
 
         int pos = coord2pos(GRID_COLS, row, col);
-        CellState *cellState = cellsMeta.at(pos);
+        CellState *cellState = cells.at(pos);
         if (cellState->isHasBomb()) {
             std::cout << "YOU ARE DEAD!!!" << std::endl;
             alive = false;

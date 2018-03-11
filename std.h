@@ -5,6 +5,19 @@
 #ifndef MINESWEEPER_STD_H
 #define MINESWEEPER_STD_H
 
+static const int NULL_CELL = -1;
+
+std::string implode(const std::vector<int> v1, const char *delimiter) {
+    std::ostringstream oss;
+    std::copy(
+            v1.begin(),
+            v1.end() - 1,
+            std::ostream_iterator<int>(oss, delimiter)
+    );
+    oss << v1.back();
+    return oss.str();
+}
+
 class CellState {
 private:
     bool closed;
@@ -112,6 +125,39 @@ Rectangle *get_rect(
             cw - margin,
             ch - margin
     );
+}
+
+std::vector<int> getNearest(const int pos,
+                            const int colsCount, const int rowsCount) {
+    std::vector<int> res;
+
+    int n = pos + 1 > colsCount
+            ? (pos - colsCount)
+            : NULL_CELL;
+    res.push_back(n);
+
+    int ne = (pos + 1 > colsCount && pos % colsCount < colsCount
+              ? (pos - colsCount + 1)
+              : NULL_CELL);
+    res.push_back(ne);
+
+    int e = (pos % colsCount + 1 < colsCount)
+            ? (pos + 1)
+            : NULL_CELL;
+    res.push_back(e);
+
+    // TODO: se
+
+    // TODO: s
+
+    // TODO: sw
+
+    int w = (pos % colsCount > 0) ? (pos - 1) : NULL_CELL;
+    res.push_back(w);
+
+    // TODO: nw
+
+    return res;
 }
 
 #endif //MINESWEEPER_STD_H

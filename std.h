@@ -5,6 +5,9 @@
 #ifndef MINESWEEPER_STD_H
 #define MINESWEEPER_STD_H
 
+#include <iterator>
+#include <sstream>
+
 static const int NULL_CELL = -1;
 
 std::string implode(const std::vector<int> v1, const char *delimiter) {
@@ -131,7 +134,7 @@ std::vector<int> getNearest(const int pos,
                             const int colsCount, const int rowsCount) {
     std::vector<int> res;
 
-    int n = pos + 1 > colsCount
+    int n = pos - colsCount > 0
             ? (pos - colsCount)
             : NULL_CELL;
     res.push_back(n);
@@ -146,16 +149,35 @@ std::vector<int> getNearest(const int pos,
             : NULL_CELL;
     res.push_back(e);
 
-    // TODO: se
+    int tmp_se = pos + colsCount + 1;
+    int se = (
+                     tmp_se <= colsCount * rowsCount - 1
+                     && tmp_se % colsCount > pos % colsCount
+             )
+             ? tmp_se
+             : NULL_CELL;
+    res.push_back(se);
 
-    // TODO: s
+    int s = (pos + colsCount < colsCount * rowsCount - 1)
+            ? pos + colsCount
+            : NULL_CELL;
+    res.push_back(s);
 
-    // TODO: sw
+    int tmp_sw = pos + colsCount - 1;
+    int sw = tmp_sw >= 0 && tmp_sw % colsCount < pos % colsCount
+             ? tmp_sw
+             : NULL_CELL;
+    res.push_back(sw);
 
     int w = (pos % colsCount > 0) ? (pos - 1) : NULL_CELL;
     res.push_back(w);
 
     // TODO: nw
+    int tmp_nw = pos - colsCount - 1;
+    int nw = tmp_nw >= 0 && tmp_nw % colsCount < pos % colsCount
+             ? tmp_nw
+             : NULL_CELL;
+    res.push_back(nw);
 
     return res;
 }

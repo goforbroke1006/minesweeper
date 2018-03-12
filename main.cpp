@@ -16,6 +16,7 @@
 
 #include "std.h"
 #include "extra_glut.h"
+#include "field.h"
 
 bool MDEBUG = false;
 //#ifdef _DEBUG
@@ -115,18 +116,7 @@ int main(int argc, char **argv) {
     glLoadIdentity();
     glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1.0, 1.0);
 
-    // Generate bombs
-    for (int i = 0; i < 10;) {
-        int cpos = myRand(0, GRID_ROWS * GRID_COLS);
-        std::cout << "Create bomb in cell # " << cpos << std::endl;
-//        if (cells.at(cpos) == cells.end()) {
-
-        auto *state = cells.at(cpos);
-        state->setHasBomb(true);
-        cells.push_back(state);
-        i++;
-//        }
-    }
+    generateBombs(cells, 500);
 
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
@@ -160,7 +150,6 @@ void display() {
 }
 
 void resize(int width, int height) {
-//    glutReshapeWindow(SCREEN_WIDTH, SCREEN_TOP_MARGIN + SCREEN_HEIGHT);
     glutReshapeWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
@@ -175,12 +164,20 @@ void mouseClicks(int button, int state, int x, int y) {
         int col = x / cellWidth;
 
         int pos = coord2pos(GRID_COLS, row, col);
-        CellState *cellState = cells.at(pos);
-        if (cellState->isHasBomb()) {
-            std::cout << "YOU ARE DEAD!!!" << std::endl;
-            alive = false;
-        }
-        cellState->setClosed(false);
+        alive = touchCell(cells, pos);
+
+//        auto n = getNearest(pos, GRID_COLS, GRID_ROWS);
+//        for (auto it = n.begin(); it != n.end(); it++) {
+//            CellState *nc = cells.at(*it);
+//            if (!nc->isHasBomb()) {
+//                nc->setClosed(false);
+//            }
+//        }
+
+        auto *excluded = new std::set<int>;
+        excluded->insert(pos);
+        openClosestRecursively(cells, pos, GRID_COLS, GRID_ROWS, excluded);
+        delete excluded;
 
         std::cout << "Click on " << x << ":" << y << ", " << col << ":" << row << std::endl;
         glutPostRedisplay();

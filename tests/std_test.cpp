@@ -45,4 +45,6 @@ TEST_CASE("Nearest cells detect correctly") {
             == std::vector<int>{80, 81, 91, NULL_CELL, NULL_CELL, NULL_CELL, NULL_CELL, NULL_CELL}); // cell 1x10 in 10x10-grid
     REQUIRE(getNearest(70, 10, 10)
             == std::vector<int>{60, 61, 71, 81, 80, NULL_CELL, NULL_CELL, NULL_CELL}); // cell 1x8 in 10x10-grid
+    REQUIRE(getNearest(79, 10, 10)
+            == std::vector<int>{69, NULL_CELL, NULL_CELL, NULL_CELL, 89, 88, 78, 68}); // cell 10x8 in 10x10-grid
 }

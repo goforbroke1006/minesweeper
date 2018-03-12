@@ -35,7 +35,8 @@ void openClosestRecursively(
         std::vector<CellState *> field,
         const int pos,
         const int colsCount, const int rowsCount,
-        std::set<int> *excluded) {
+        std::set<int> *excluded
+) {
     auto n = getNearest(pos, colsCount, rowsCount);
     for (auto it = n.begin(); it != n.end(); it++) {
         if (NULL_CELL == *it

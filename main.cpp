@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1.0, 1.0);
 
     if (debug)
-        dump_generateBombs(cells, 500);
+        dump_generateBombs(cells);
     else
         generateBombs(cells, 500);
 

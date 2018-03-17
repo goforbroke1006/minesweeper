@@ -50,6 +50,7 @@ void openClosestRecursively(
 
             if (std::distance(n.begin(), it) % 2 == 0) {
                 openClosestRecursively(field, *it, colsCount, rowsCount, excluded);
+//                std::cout << *it << std::endl;
             }
         }
     }

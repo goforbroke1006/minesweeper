@@ -7,19 +7,17 @@
 
 #include "std.h"
 
-void dump_generateBombs(
-        std::vector<CellState *> field,
-        const unsigned long count
-) {
-    std::vector<long> c = {0, 1, 2, 3, 4, 5, 6, 7,
-                           47, 87, 127, 167, 207, 247, 287, 327, 367, 407, 447,
-                           446, 445, 444, 443, 442, 441, 440, 400,
-                           360, 320, 280, 240, 200, 160, 120, 80, 40,
+void dump_generateBombs(std::vector<CellState *> field) {
+    std::vector<long> c = {
+            0, 1, 2, 3, 4, 5, 6, 7,
+            47, 87, 127, 167, 207, 247,
+            246, 245, 244, 243, 242, 241, 240,
+            240, 200, 160, 120, 80, 40,
 
-                           10, 11, 12,
-                           52, 92,
-                           91, 90,
-                           50
+            10, 11,
+            12, 52,
+            92, 91,
+            90, 50
     };
 
 

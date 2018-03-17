@@ -7,15 +7,16 @@
 
 #include <iterator>
 #include <sstream>
+#include <random>
 
-static const int NULL_CELL = -1;
+static const long NULL_CELL = -1;
 
-std::string implode(const std::vector<int> v1, const char *delimiter) {
+std::string implode(const std::vector<int> &v1, const std::string &delimiter) {
     std::ostringstream oss;
     std::copy(
             v1.begin(),
             v1.end() - 1,
-            std::ostream_iterator<int>(oss, delimiter)
+            std::ostream_iterator<int>(oss, delimiter.c_str())
     );
     oss << v1.back();
     return oss.str();
@@ -52,131 +53,135 @@ public:
 
 class Rectangle {
 private:
-    int x, y, w, h;
+    long x, y;
+    unsigned long w, h;
 public:
-//    Rectangle() {}
+    Rectangle(long x, long y, unsigned long w, unsigned long h)
+            : x(x), y(y), w(w), h(h) {}
 
-    Rectangle(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
-
-    int getX() const {
+    long getX() const {
         return x;
     }
 
-    void setX(int x) {
+    void setX(long x) {
         Rectangle::x = x;
     }
 
-    int getY() const {
+    long getY() const {
         return y;
     }
 
-    void setY(int y) {
+    void setY(long y) {
         Rectangle::y = y;
     }
 
-    int getW() const {
+    unsigned long getW() const {
         return w;
     }
 
-    void setW(int w) {
+    void setW(unsigned long w) {
         Rectangle::w = w;
     }
 
-    int getH() const {
+    unsigned long getH() const {
         return h;
     }
 
-    void setH(int h) {
+    void setH(unsigned long h) {
         Rectangle::h = h;
     }
 };
 
-int coord2pos(const int colsCount, const int row, const int col) {
-    return row * colsCount + col;
+const unsigned long coord2pos(const int colsCount,
+                              const int row, const int col) {
+    return static_cast<const unsigned long>(row * colsCount + col);
 }
 
-int myRand(const int from, const int to) {
-    return rand() % to + from;
+long myRand(const long from, const long to) {
+    static std::random_device rd;
+    static std::mt19937 mt(rd());
+    static std::uniform_int_distribution<long> dist(from, to);
+    return dist(mt);
 }
 
-int get_row_pos(const int pos, const int colsCount) {
-    int lp = pos + 1;
+const unsigned long get_row_pos(const unsigned long pos, const int colsCount) {
+    unsigned long lp = pos + 1;
     return lp / colsCount + (lp % colsCount > 0 ? 1 : 0) - 1;
 }
 
-int get_col_pos(const int pos, const int colsCount) { return pos % colsCount; }
+const unsigned long get_col_pos(const unsigned long pos, const int colsCount) { return pos % colsCount; }
 
-Rectangle *get_rect(
-        const int position,
+Rectangle get_rect(
+        const unsigned long position,
         const int rowsCount, const int colsCount,
-        const int screenWidth, const int screenHeght,
-        const int margin
+        const unsigned long screenWidth, const unsigned long screenHeght,
+        const long margin
 ) {
-    const int cw = screenWidth / colsCount;
-    const int ch = screenHeght / rowsCount;
+    const unsigned long cw = screenWidth / colsCount;
+    const unsigned long ch = screenHeght / rowsCount;
 
-    const int
+    const unsigned long
             x = get_col_pos(position, colsCount),
             y = get_row_pos(position, colsCount);
 
-    int left = x * cw + margin / 2;
-    int top = y * ch + margin / 2;
+    const unsigned long left = x * cw + margin / 2;
+    const unsigned long top = y * ch + margin / 2;
 
-    return new Rectangle(
+    return {
             left,
             top,
             cw - margin,
             ch - margin
-    );
+    };
 }
 
-std::vector<int> getNearest(const int pos,
-                            const int colsCount, const int rowsCount) {
-    std::vector<int> res;
+std::vector<long> getNearest(const unsigned long pos,
+                             const int colsCount, const int rowsCount) {
+    std::vector<long> res;
 
-    int n = pos - colsCount > 0
-            ? (pos - colsCount)
-            : NULL_CELL;
+    const long tmp_n = pos - colsCount;
+    const long n = tmp_n >= 0
+                   ? (pos - colsCount)
+                   : NULL_CELL;
     res.push_back(n);
 
-    int ne = (pos + 1 > colsCount && pos % colsCount < colsCount
+    const long tmp_ne = pos - colsCount + 1;
+    long ne = tmp_ne >= 0 && tmp_ne % colsCount > pos % colsCount
               ? (pos - colsCount + 1)
-              : NULL_CELL);
+              : NULL_CELL;
     res.push_back(ne);
 
-    int e = (pos % colsCount + 1 < colsCount)
-            ? (pos + 1)
-            : NULL_CELL;
+    long e = (pos % colsCount + 1 < colsCount)
+             ? (pos + 1)
+             : NULL_CELL;
     res.push_back(e);
 
-    int tmp_se = pos + colsCount + 1;
-    int se = (
-                     tmp_se <= colsCount * rowsCount - 1
-                     && tmp_se % colsCount > pos % colsCount
-             )
-             ? tmp_se
-             : NULL_CELL;
+    long tmp_se = pos + colsCount + 1;
+    long se =
+            tmp_se <= colsCount * rowsCount - 1
+            && tmp_se % colsCount > pos % colsCount
+            ? tmp_se
+            : NULL_CELL;
     res.push_back(se);
 
-    int s = (pos + colsCount < colsCount * rowsCount - 1)
-            ? pos + colsCount
-            : NULL_CELL;
+    long s = (pos + colsCount < colsCount * rowsCount - 1)
+             ? pos + colsCount
+             : NULL_CELL;
     res.push_back(s);
 
-    int tmp_sw = pos + colsCount - 1;
-    int sw = tmp_sw >= 0 && tmp_sw % colsCount < pos % colsCount
-             ? tmp_sw
-             : NULL_CELL;
+    long tmp_sw = pos + colsCount - 1;
+    long sw = tmp_sw >= 0 && tmp_sw % colsCount < pos % colsCount
+              ? tmp_sw
+              : NULL_CELL;
     res.push_back(sw);
 
-    int w = (pos % colsCount > 0) ? (pos - 1) : NULL_CELL;
+    long w = (pos % colsCount > 0) ? (pos - 1) : NULL_CELL;
     res.push_back(w);
 
-    // TODO: nw
-    int tmp_nw = pos - colsCount - 1;
-    int nw = tmp_nw >= 0 && tmp_nw % colsCount < pos % colsCount
-             ? tmp_nw
-             : NULL_CELL;
+    long tmp_nw = pos - colsCount - 1;
+    long nw = tmp_nw >= 0 && tmp_nw % colsCount < pos % colsCount
+              ? tmp_nw
+              : NULL_CELL;
     res.push_back(nw);
 
     return res;

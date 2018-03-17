@@ -11,20 +11,18 @@
 
 #include "std.h"
 
-void generateBombs(std::vector<CellState *> field, const int count) {
-    for (int i = 0; i < count;) {
-        int cpos = myRand(0, field.size());
+void generateBombs(std::vector<CellState *> field, const unsigned long count) {
+    for (int i = 0; i < count; i++) {
+        long cpos = myRand(0, field.size());
         auto *state = field.at(cpos);
         state->setHasBomb(true);
         field.push_back(state);
-        i++;
     }
 }
 
-bool touchCell(std::vector<CellState *> field, const int pos) {
+bool touchCell(std::vector<CellState *> field, const unsigned long pos) {
     CellState *c = field.at(pos);
     if (c->isHasBomb()) {
-        std::cout << "YOU ARE DEAD!!!" << std::endl;
         return false;
     }
     c->setClosed(false);
@@ -33,9 +31,9 @@ bool touchCell(std::vector<CellState *> field, const int pos) {
 
 void openClosestRecursively(
         std::vector<CellState *> field,
-        const int pos,
+        const unsigned long pos,
         const int colsCount, const int rowsCount,
-        std::set<int> *excluded
+        std::set<unsigned long> *excluded
 ) {
     auto n = getNearest(pos, colsCount, rowsCount);
     for (auto it = n.begin(); it != n.end(); it++) {

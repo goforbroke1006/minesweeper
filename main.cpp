@@ -17,15 +17,7 @@
 #include "std.h"
 #include "extra_glut.h"
 #include "field.h"
-
-bool MDEBUG = false;
-//#ifdef _DEBUG
-//#ifdef NDEBUG
-#if defined(_DEBUG) || defined(NDEBUG)
-MDEBUG = true;
-#endif
-
-bool alive = true;
+#include "dump.h"
 
 static const int SCREEN_WIDTH = 800;
 static const int SCREEN_HEIGHT = 600;
@@ -34,7 +26,8 @@ static const int GRID_COLS = 40;
 static const int GRID_ROWS = 30;
 static const int GRID_CELL_SPACING = 2;
 
-
+bool debug = false;
+bool alive = true;
 std::vector<CellState *> cells;
 
 void display();
@@ -43,62 +36,17 @@ void resize(int width, int height);
 
 void mouseClicks(int button, int state, int x, int y);
 
-
-void drawCell(int position, CellState *cellState) {
-    auto r = get_rect(position,
-                      GRID_ROWS, GRID_COLS,
-                      SCREEN_WIDTH, SCREEN_HEIGHT,
-                      GRID_CELL_SPACING);
-
-    GLfloat red = 1.0, green = 1.0, blue = 1.0;
-
-    if (MDEBUG && cellState->isClosed() && cellState->isHasBomb()) {
-        green = 0.75;
-        blue = 0.75;
-    } else if (cellState->isClosed()) {
-        red = 0.75;
-        green = 0.75;
-        blue = 0.75;
-    } else if (cellState->isHasBomb()) {
-        green = 0.0;
-        blue = 0.0;
-    }
-
-    drawRect(r->getX(), r->getY(), r->getW(), r->getH(),
-             red, green, blue);
-
-    if (!cellState->isClosed() && cellState->isHasBomb()) {
-        glColor3f(0.25, 0.25, 0.25);
-        drawCircle(r->getX() + r->getW() / 2,
-                   r->getY() + r->getH() / 2,
-                   std::min(r->getW() / 4, r->getH() / 4),
-                   15);
-    }
-
-    delete r;
-}
-
-void glSprint(int x, int y, char *st) {
-    int l, i;
-
-    l = std::strlen(st); // see how many characters are in text string.
-    glRasterPos2i(x, y); // location to start printing text
-    for (i = 0; i < l; i++) // loop until i is greater then l
-    {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, st[i]); // Print a character on the screen
-    }
-}
-
 bool isDebug() {
+#if defined(_DEBUG) || defined(NDEBUG)
+    return true;
+#endif
     return ptrace(PTRACE_TRACEME, 0, 1, 0) == -1;
 }
 
 int main(int argc, char **argv) {
     if (isDebug()) {
-        MDEBUG = true;
+        debug = true;
     }
-
-    srand(time(NULL));
 
     for (int i = 0; i < GRID_ROWS * GRID_COLS; i++) {
         cells.push_back(new CellState);
@@ -116,7 +64,10 @@ int main(int argc, char **argv) {
     glLoadIdentity();
     glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1.0, 1.0);
 
-    generateBombs(cells, 500);
+    if (debug)
+        dump_generateBombs(cells, 500);
+    else
+        generateBombs(cells, 500);
 
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
@@ -132,7 +83,11 @@ void display() {
 
     for (unsigned long i = 0; i < GRID_ROWS * GRID_COLS; i++) {
         CellState *state = cells.at(i);
-        drawCell(i, state);
+        auto r = get_rect(i,
+                          GRID_ROWS, GRID_COLS,
+                          SCREEN_WIDTH, SCREEN_HEIGHT,
+                          GRID_CELL_SPACING);
+        drawCell(i, state, r, debug);
     }
 
     if (!alive) {
@@ -143,7 +98,7 @@ void display() {
                  0, 0, 0);
 
         glColor3f(1.0, 0.25, 0.25);
-        glSprint(SCREEN_WIDTH / 2 - 75, h2 + 10, const_cast<char *>("GAME OVER"));
+        drawText(SCREEN_WIDTH / 2 - 75, h2 + 10, "GAME OVER");
     }
 
     glFlush();
@@ -163,23 +118,17 @@ void mouseClicks(int button, int state, int x, int y) {
         int row = y / cellHeight;
         int col = x / cellWidth;
 
-        int pos = coord2pos(GRID_COLS, row, col);
+        auto pos = coord2pos(GRID_COLS, row, col);
         alive = touchCell(cells, pos);
 
-//        auto n = getNearest(pos, GRID_COLS, GRID_ROWS);
-//        for (auto it = n.begin(); it != n.end(); it++) {
-//            CellState *nc = cells.at(*it);
-//            if (!nc->isHasBomb()) {
-//                nc->setClosed(false);
-//            }
-//        }
+        if (alive) {
+            auto *excluded = new std::set<unsigned long>;
+            excluded->insert(pos);
+            openClosestRecursively(cells, pos, GRID_COLS, GRID_ROWS, excluded);
+            delete excluded;
+        }
 
-        auto *excluded = new std::set<int>;
-        excluded->insert(pos);
-        openClosestRecursively(cells, pos, GRID_COLS, GRID_ROWS, excluded);
-        delete excluded;
-
-        std::cout << "Click on " << x << ":" << y << ", " << col << ":" << row << std::endl;
+        std::cout << "Click on " << pos << " - " << x << ":" << y << ", " << col << ":" << row << std::endl;
         glutPostRedisplay();
     }
 }

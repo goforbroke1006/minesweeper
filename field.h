@@ -31,27 +31,24 @@ bool touchCell(std::vector<CellState *> field, const unsigned long pos) {
 
 void openClosestRecursively(
         std::vector<CellState *> field,
-        const unsigned long pos,
+        const long pos,
         const int colsCount, const int rowsCount,
-        std::set<unsigned long> *excluded
+        std::set<long> *excluded
 ) {
     auto n = getNearest(pos, colsCount, rowsCount);
     for (auto it = n.begin(); it != n.end(); it++) {
-        if (NULL_CELL == *it
-            || *it >= field.size()
-            || excluded->find(*it) != excluded->end()) {
+        const long &npos = *it;
+        if (NULL_CELL == npos
+            || npos >= field.size()
+            || excluded->find(npos) != excluded->end()) {
             continue;
         }
-
-        CellState *nc = field.at(*it);
+        
+        CellState *nc = field.at(npos);
         if (!nc->isHasBomb()) {
             nc->setClosed(false);
-            excluded->insert(*it);
-
-            if (std::distance(n.begin(), it) % 2 == 0) {
-                openClosestRecursively(field, *it, colsCount, rowsCount, excluded);
-//                std::cout << *it << std::endl;
-            }
+            excluded->insert(npos);
+            openClosestRecursively(field, npos, colsCount, rowsCount, excluded);
         }
     }
 }

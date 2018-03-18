@@ -64,9 +64,9 @@ int main(int argc, char **argv) {
     glLoadIdentity();
     glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1.0, 1.0);
 
-    if (debug)
-        dump_generateBombs(cells);
-    else
+//    if (debug)
+//        dump_generateBombs(cells);
+//    else
         generateBombs(cells, 500);
 
     glutDisplayFunc(display);
@@ -122,7 +122,7 @@ void mouseClicks(int button, int state, int x, int y) {
         alive = touchCell(cells, pos);
 
         if (alive) {
-            auto *excluded = new std::set<unsigned long>;
+            auto *excluded = new std::set<long>;
             excluded->insert(pos);
             openClosestRecursively(cells, pos, GRID_COLS, GRID_ROWS, excluded);
             delete excluded;

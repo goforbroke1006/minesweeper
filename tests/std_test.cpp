@@ -36,28 +36,28 @@ TEST_CASE("Getting rectangle by position works fine") {
 
 TEST_CASE("Nearest cells detect correctly") {
     REQUIRE(getNearest(5, 4, 4) == std::vector<long>{
-            1, 2, 6, 10, 9, 8, 4, 0
+            1, 6, 9, 4
     }); // cell 2x2 in 4x4-grid
     REQUIRE(getNearest(0, 4, 4) == std::vector<long>{
-            NULL_CELL, NULL_CELL, 1, 5, 4, NULL_CELL, NULL_CELL, NULL_CELL
+            NULL_CELL, 1, 4, NULL_CELL
     }); // cell 1x1 in 4x4-grid
 
     REQUIRE(getNearest(0, 10, 10) == std::vector<long>{
-            NULL_CELL, NULL_CELL, 1, 11, 10, NULL_CELL, NULL_CELL, NULL_CELL
+            NULL_CELL, 1, 10, NULL_CELL
     }); // cell 1x1 in 10x10-grid
     REQUIRE(getNearest(1, 10, 10) == std::vector<long>{
-            NULL_CELL, NULL_CELL, 2, 12, 11, 10, 0, NULL_CELL
+            NULL_CELL, 2, 11, 0
     }); // cell 2x1 in 10x10-grid
     REQUIRE(getNearest(88, 10, 10) == std::vector<long>{
-            78, 79, 89, 99, 98, 97, 87, 77
+            78, 89, 98, 87
     }); // cell 9x9 in 10x10-grid
     REQUIRE(getNearest(90, 10, 10) == std::vector<long>{
-            80, 81, 91, NULL_CELL, NULL_CELL, NULL_CELL, NULL_CELL, NULL_CELL
+            80, 91, NULL_CELL, NULL_CELL
     }); // cell 1x10 in 10x10-grid
     REQUIRE(getNearest(70, 10, 10) == std::vector<long>{
-            60, 61, 71, 81, 80, NULL_CELL, NULL_CELL, NULL_CELL
+            60, 71, 80, NULL_CELL
     }); // cell 1x8 in 10x10-grid
     REQUIRE(getNearest(79, 10, 10) == std::vector<long>{
-            69, NULL_CELL, NULL_CELL, NULL_CELL, 89, 88, 78, 68
+            69, NULL_CELL, 89, 78
     }); // cell 10x8 in 10x10-grid
 }

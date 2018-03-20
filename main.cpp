@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 //    if (debug)
 //        dump_generateBombs(cells);
 //    else
-        generateBombs(cells, 500);
+    generateBombs(cells, 500);
 
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
@@ -87,7 +87,8 @@ void display() {
                           GRID_ROWS, GRID_COLS,
                           SCREEN_WIDTH, SCREEN_HEIGHT,
                           GRID_CELL_SPACING);
-        drawCell(i, state, r, debug);
+        short bc = getBombsCount(cells, i, GRID_COLS, GRID_ROWS);
+        drawCell(i, state, r, bc, debug);
     }
 
     if (!alive) {

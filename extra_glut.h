@@ -15,7 +15,7 @@
 
 #include <cmath>
 
-void drawText(int x, int y, std::string s,
+void drawText(long x, long y, std::string s,
               void *fontStyle = GLUT_BITMAP_TIMES_ROMAN_24) {
     size_t len = std::strlen(s.c_str());
     glRasterPos2i(x, y);
@@ -24,7 +24,7 @@ void drawText(int x, int y, std::string s,
     }
 }
 
-void drawCircle(int cx, int cy, int radius, int sidesCount) {
+void drawCircle(long cx, long cy, long radius, long sidesCount) {
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(cx, cy);
     GLfloat x2, y2;
@@ -38,7 +38,7 @@ void drawCircle(int cx, int cy, int radius, int sidesCount) {
     glEnd();
 }
 
-void drawRect(int x, int y, int w, int h,
+void drawRect(long x, long y, long w, long h,
               GLfloat red, GLfloat green, GLfloat blue) {
     glColor3f(red, green, blue);
 
@@ -51,6 +51,7 @@ void drawRect(int x, int y, int w, int h,
 }
 
 void drawCell(const unsigned long position, CellState *cellState, Rectangle &r,
+              short bombCount = 0,
               bool debug = false
 ) {
     GLfloat red = 1.0, green = 1.0, blue = 1.0;
@@ -76,6 +77,10 @@ void drawCell(const unsigned long position, CellState *cellState, Rectangle &r,
                    r.getY() + r.getH() / 2,
                    std::min(r.getW() / 4, r.getH() / 4),
                    15);
+    }
+    if (!cellState->isClosed() && bombCount > 0) {
+        glColor3f(0.5, 0.5, 0.5);
+        drawText(r.getX(), r.getY() + r.getH(), std::to_string(bombCount), GLUT_BITMAP_HELVETICA_18);
     }
 }
 

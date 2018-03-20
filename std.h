@@ -135,8 +135,8 @@ Rectangle get_rect(
     };
 }
 
-std::vector<long> getNearest(const long pos,
-                             const int colsCount, const int rowsCount) {
+std::vector<long> getNearestNESW(const long pos,
+                                 const int colsCount, const int rowsCount) {
     std::vector<long> res;
 
     const long tmp_n = pos - colsCount;
@@ -151,7 +151,7 @@ std::vector<long> getNearest(const long pos,
 //              : NULL_CELL;
 //    res.push_back(ne);
 
-    long e = (pos % colsCount + 1 < colsCount)
+    long e = (pos % colsCount + 1 < colsCount && pos + 1 < rowsCount * colsCount)
              ? (pos + 1)
              : NULL_CELL;
     res.push_back(e);
@@ -164,7 +164,7 @@ std::vector<long> getNearest(const long pos,
 //            : NULL_CELL;
 //    res.push_back(se);
 
-    long s = (pos + colsCount < colsCount * rowsCount - 1)
+    long s = (pos + colsCount < colsCount * rowsCount - 1) && pos + colsCount < rowsCount * colsCount
              ? pos + colsCount
              : NULL_CELL;
     res.push_back(s);
@@ -184,6 +184,64 @@ std::vector<long> getNearest(const long pos,
 //              : NULL_CELL;
 //    res.push_back(nw);
 
+    return res;
+}
+
+std::vector<long> getNearestAll(const long pos,
+                                const int colsCount, const int rowsCount) {
+    std::vector<long> res;
+
+    int total = rowsCount * colsCount;
+
+    auto news = getNearestNESW(pos, colsCount, rowsCount);
+    long &n = news.at(0);
+    long &e = news.at(1);
+    long &s = news.at(2);
+    long &w = news.at(3);
+
+
+    res.push_back(n);
+
+    const long tmp_ne = pos - colsCount + 1;
+    long ne = tmp_ne >= 0 && tmp_ne % colsCount > pos % colsCount
+              ? (pos - colsCount + 1) : NULL_CELL;
+    res.push_back(ne);
+
+    res.push_back(e);
+
+    long tmp_se = pos + colsCount + 1;
+    long se = tmp_se <= colsCount * rowsCount - 1
+              && tmp_se % colsCount > pos % colsCount
+              && tmp_se < total
+              ? tmp_se : NULL_CELL;
+    res.push_back(se);
+
+    res.push_back(s);
+
+    long tmp_sw = pos + colsCount - 1;
+    long sw = tmp_sw >= 0 && tmp_sw % colsCount < pos % colsCount && tmp_sw < total
+              ? tmp_sw : NULL_CELL;
+    res.push_back(sw);
+
+    res.push_back(w);
+
+    long tmp_nw = pos - colsCount - 1;
+    long nw = tmp_nw >= 0 && tmp_nw % colsCount < pos % colsCount
+              ? tmp_nw : NULL_CELL;
+    res.push_back(nw);
+
+
+    return res;
+}
+
+short getBombsCount(std::vector<CellState *> cells, long pos,
+                    const int colsCount, const int rowsCount) {
+    short res = 0;
+    auto nList = getNearestAll(pos, colsCount, rowsCount);
+    for (long &n : nList) {
+        if (n == NULL_CELL) continue;
+        if (cells.at(n)->isHasBomb()) res++;
+    }
     return res;
 }
 

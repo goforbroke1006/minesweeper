@@ -35,9 +35,8 @@ void openClosestRecursively(
         const int colsCount, const int rowsCount,
         std::set<long> *excluded
 ) {
-    auto n = getNearest(pos, colsCount, rowsCount);
-    for (auto it = n.begin(); it != n.end(); it++) {
-        const long &npos = *it;
+    auto n = getNearestNESW(pos, colsCount, rowsCount);
+    for (long &npos : n) {
         if (NULL_CELL == npos
             || npos >= field.size()
             || excluded->find(npos) != excluded->end()) {

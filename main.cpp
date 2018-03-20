@@ -6,7 +6,6 @@
 #include <vector>
 #include <algorithm>
 #include <map>
-#include <cmath>
 #include <cstring>
 #include <sys/ptrace.h>
 
@@ -28,6 +27,7 @@ static const int GRID_CELL_SPACING = 2;
 
 bool debug = false;
 bool alive = true;
+bool win = false;
 std::vector<CellState *> cells;
 
 void display();
@@ -64,10 +64,7 @@ int main(int argc, char **argv) {
     glLoadIdentity();
     glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1.0, 1.0);
 
-//    if (debug)
-//        dump_generateBombs(cells);
-//    else
-    generateBombs(cells, 500);
+    generateBombs(cells, 400);
 
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
@@ -102,6 +99,17 @@ void display() {
         drawText(SCREEN_WIDTH / 2 - 75, h2 + 10, "GAME OVER");
     }
 
+    if (win) {
+        int w4 = SCREEN_WIDTH / 4, h4 = SCREEN_HEIGHT / 4;
+        int w2 = SCREEN_WIDTH / 2;
+        int h2 = SCREEN_HEIGHT / 2;
+        drawRect(w4, h4, w2, h2,
+                 0, 0, 0);
+
+        glColor3f(0.25, 1.0, 0.25);
+        drawText(SCREEN_WIDTH / 2 - 80, h2 + 10, "!!!YOU WIN!!!");
+    }
+
     glFlush();
 }
 
@@ -111,6 +119,7 @@ void resize(int width, int height) {
 
 void mouseClicks(int button, int state, int x, int y) {
     if (!alive) return;
+    if (win) return;
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         int cellWidth = SCREEN_WIDTH / GRID_COLS;
@@ -119,7 +128,7 @@ void mouseClicks(int button, int state, int x, int y) {
         int row = y / cellHeight;
         int col = x / cellWidth;
 
-        auto pos = coord2pos(GRID_COLS, row, col);
+        long pos = coord2pos(GRID_COLS, row, col);
         alive = touchCell(cells, pos);
 
         if (alive) {
@@ -128,6 +137,12 @@ void mouseClicks(int button, int state, int x, int y) {
             openClosestRecursively(cells, pos, GRID_COLS, GRID_ROWS, excluded);
             delete excluded;
         }
+
+        long c = 0;
+        for (CellState *cs : cells) {
+            if (!cs->isHasBomb() && cs->isClosed()) c++;
+        }
+        if (c == 0) win = true;
 
         std::cout << "Click on " << pos << " - " << x << ":" << y << ", " << col << ":" << row << std::endl;
         glutPostRedisplay();

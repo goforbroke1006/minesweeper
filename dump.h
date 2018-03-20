@@ -21,8 +21,8 @@ void dump_generateBombs(std::vector<CellState *> field) {
     };
 
 
-    for (auto it = c.begin(); it != c.end(); it++) {
-        auto *state = field.at(*it);
+    for (long &it : c) {
+        auto *state = field.at(it);
         state->setHasBomb(true);
         field.push_back(state);
     }

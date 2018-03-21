@@ -48,6 +48,11 @@ int main(int argc, char **argv) {
         debug = true;
     }
 
+    unsigned short bombsCount = 400;
+    if (argc >= 2) {
+        bombsCount = atoi(argv[1]);
+    }
+
     for (int i = 0; i < GRID_ROWS * GRID_COLS; i++) {
         cells.push_back(new CellState);
     }
@@ -64,7 +69,7 @@ int main(int argc, char **argv) {
     glLoadIdentity();
     glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1.0, 1.0);
 
-    generateBombs(cells, 400);
+    generateBombs(cells, bombsCount);
 
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
